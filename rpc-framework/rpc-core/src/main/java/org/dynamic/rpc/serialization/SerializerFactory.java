@@ -5,7 +5,6 @@ import org.dynamic.rpc.serialization.Impl.JDKSerializer;
 import org.dynamic.rpc.serialization.Impl.JsonSerializer;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -15,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class SerializerFactory {
-    private final static ConcurrentHashMap<String,SerializerWrapper> SERIALIZER_CACHE = new ConcurrentHashMap(8);
+    private final static ConcurrentHashMap<String,SerializerWrapper> SERIALIZER_CACHE = new ConcurrentHashMap<>(8);
     private final static ConcurrentHashMap<Byte,SerializerWrapper> TYPE_CODE_CACHE = new ConcurrentHashMap<>(8);
 
 
@@ -37,7 +36,7 @@ public class SerializerFactory {
             }
             return SERIALIZER_CACHE.get("JDK");
         }
-        return SERIALIZER_CACHE.get(type);
+        return wrapper;
     }
 
     public static SerializerWrapper getSerializerWrapper(byte code){
@@ -48,7 +47,7 @@ public class SerializerFactory {
     public static < T extends Serializer> void addSerializerIfAbsent(   T serializer){
         String type = serializer.getClass().getSimpleName().replace("Serializer","");
         for(String s : SERIALIZER_CACHE.keySet()){
-            if(s.toLowerCase().equals(type.toLowerCase())){
+            if(s.equalsIgnoreCase(type)){
                 log.info("已加载序列化方式：{}，无需重复加载",type);
                 return;
             }
