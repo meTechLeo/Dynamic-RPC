@@ -1,10 +1,7 @@
 package org.dynamic.rpc.compress;
 
-import io.netty.handler.logging.LogLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.dynamic.rpc.compress.Impl.GzipCompressor;
-import org.dynamic.rpc.serialization.Serializer;
-import org.dynamic.rpc.serialization.SerializerWrapper;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class CompressorFactory {
-    private final static ConcurrentHashMap<String, CompressorWrapper> COMPRESSOR_CACHE = new ConcurrentHashMap(8);
-    private final static ConcurrentHashMap<Byte, CompressorWrapper> TYPE_CODE_CACHE = new ConcurrentHashMap<Byte, CompressorWrapper>(8);
+    private final static ConcurrentHashMap<String, CompressorWrapper> COMPRESSOR_CACHE = new ConcurrentHashMap<>(8);
+    private final static ConcurrentHashMap<Byte, CompressorWrapper> TYPE_CODE_CACHE = new ConcurrentHashMap<>(8);
 
 
     static{
@@ -26,7 +23,7 @@ public class CompressorFactory {
 
     }
 
-    //工厂方法获取一个序列化器
+    //工厂方法获取一个压缩器
     public static CompressorWrapper getCompressorWrapper(String type){
         CompressorWrapper wrapper = COMPRESSOR_CACHE.get(type);
         if(wrapper == null){
@@ -35,7 +32,7 @@ public class CompressorFactory {
             }
             return COMPRESSOR_CACHE.get("gzip");
         }
-        return COMPRESSOR_CACHE.get(type);
+        return wrapper;
     }
 
     public static CompressorWrapper getCompressorWrapper(byte code){
@@ -47,7 +44,7 @@ public class CompressorFactory {
         String type = compressor.getClass().getSimpleName().replace("Compressor","");
         byte code = (byte) (COMPRESSOR_CACHE.size()+1);
         for(String s : COMPRESSOR_CACHE.keySet()){
-            if(s.toLowerCase().equals(type.toLowerCase())){
+            if(s.equalsIgnoreCase(type)){
                 log.info("已加载序列化方式：{}，无需重复加载",type);
                 return;
             }

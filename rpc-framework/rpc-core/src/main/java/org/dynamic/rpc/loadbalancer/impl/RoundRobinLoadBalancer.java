@@ -1,17 +1,12 @@
 package org.dynamic.rpc.loadbalancer.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dynamic.rpc.DynamicBootstrap;
-import org.dynamic.rpc.discovery.Registry;
 import org.dynamic.rpc.exception.LoadBalancerException;
 import org.dynamic.rpc.loadbalancer.AbstractLoadBalancer;
-import org.dynamic.rpc.loadbalancer.LoadBalancer;
 import org.dynamic.rpc.loadbalancer.Selector;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -30,9 +25,9 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
 
     private static class RoundRobinSelector implements Selector{
 
-        private List<InetSocketAddress> serviceList;
+        private final List<InetSocketAddress> serviceList;
 
-        private AtomicInteger index;
+        private final AtomicInteger index;
 
 
         public RoundRobinSelector(List<InetSocketAddress> serviceList){
@@ -43,13 +38,12 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
         @Override
         public InetSocketAddress getNext() {
 
-            if(serviceList.size() == 0 || serviceList == null){
+            if(serviceList == null || serviceList.isEmpty()){
                 log.error("进行负载均衡选取可用服务结点时服务列表为空，此时无法进行负载均衡选取");
                 throw new LoadBalancerException("服务列表为空");
             }
 
-            InetSocketAddress address = serviceList.get(index.getAndIncrement() % serviceList.size());
-            return address;
+            return serviceList.get(Math.floorMod(index.getAndIncrement(), serviceList.size()));
         }
 
 
